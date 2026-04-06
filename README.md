@@ -95,19 +95,19 @@ Then open `http://localhost:8000` and select `documentation_adk` from the agent 
 
 Upload your project `.zip` and documentation template, then ask the agent to generate the docs. The agent immediately calls `prepare_documentation_preview` and begins analyzing your codebase.
 
-![Upload files and trigger generation](assets/01-upload.png)
+![Upload files and trigger generation](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.16.00.png)
 
 ### Step 2 — Review the draft preview
 
 The agent returns a structured draft preview fitted to your template. Each section is labeled so you can see exactly what was generated. You can request changes in plain English before committing.
 
-![Draft preview](assets/02-preview.png)
+![Draft preview](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.16.26.png)
 
 ### Step 3 — Confirm and save
 
 Once you're happy with the draft, reply with `confirm`, `save`, or similar. The agent finalizes the document, saves it as a named Markdown artifact (e.g. `newsletter_project_documentation.md`), and makes it available for download in the ADK Web artifacts panel.
 
-![Confirm and save](assets/03-save.png)
+![Confirm and save](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.17.39.png)
 
 ## Template Format
 
