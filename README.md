@@ -1,42 +1,56 @@
-# Documentation Agent v2
+# Documentation Agent
 
-An AI-powered documentation generation system that automatically creates software project documentation from source code repositories. Upload a project ZIP and a documentation template — the agent analyzes your codebase and produces polished, structured documentation with a human review loop.
+An AI-powered documentation generator that analyzes your codebase and produces polished, structured `.docx` documentation through a conversational review loop.
+
+Connect a GitHub repository (public or private via token) or upload a project ZIP, choose a template, preview the draft, suggest edits, and download the final file — all from a single split-screen interface.
+
+## Demo
+
+### 1. Start a session
+
+![Start screen](screenshots/01-start.png)
+
+The agent greets you and explains what it needs. Type **"github"** (or **"zip"** to upload an archive instead) and it immediately asks for your repository URL. Once provided, it confirms whether the repo is public or private and — for private repos — prompts for a personal access token. The right-hand panel shows a placeholder until the first draft is ready.
+
+### 2. Documentation preview loads automatically
+
+![Preview loaded](screenshots/02-preview.png)
+
+After you supply the URL, confirm visibility, and choose a template (or accept the default), the agent fetches the repo, analyzes the codebase, and streams a rendered documentation draft into the right panel. The example here shows a full project documentation for a medical image diagnosis deep-learning project, with an overview, features list, architecture details, and more — all structured and formatted automatically.
+
+### 3. Confirm, save, and download
+
+![Download ready](screenshots/03-download.png)
+
+Reply **"save"** (or **"confirm"**) when you're satisfied. The agent finalizes the `.docx` file and a **Download** button labeled with the filename appears in the preview header. Click it and the file downloads directly to your machine — no extra steps.
+
+---
 
 ## Features
 
-- **Two-agent pipeline**: a Code Analysis Agent drafts documentation from your codebase, then a Template Fitter Agent reshapes it to match your template
-- **Flexible templates**: supports Markdown files with placeholders (`{{overview}}`, `{{setup}}`), heading-based outlines, or plain-text skeletons
-- **Human review loop**: generates a draft preview, accepts natural-language revision requests, and saves only when you confirm
-- **Intelligent file analysis**: prioritizes key files (README, package.json, requirements.txt, etc.), skips build artifacts, and respects token/size limits
-- **ADK Web UI**: full browser-based interface with file upload and artifact download
+- **Split-screen UI** — chat on the left, live document preview on the right
+- **GitHub or ZIP input** — works with public repos, private repos (PAT), or uploaded ZIP archives
+- **Custom or default template** — upload your own `.docx`/`.md` template or use the built-in one
+- **Human review loop** — preview the draft, request revisions in plain English, save only when ready
+- **One-click `.docx` download** — final output is a properly formatted Word document
+- **Deployed on Cloud Run** — no local setup needed for end users
 
 ## Tech Stack
 
-- **Python 3.x** with async/await
-- **[Google ADK](https://github.com/google/adk-python)** — agent orchestration framework
-- **Google Gemini** — LLM backend (default: `gemini-2.0-flash`)
-- **python-dotenv** — environment configuration
+| Layer | Technology |
+|---|---|
+| Agent framework | [Google ADK](https://github.com/google/adk-python) |
+| LLM | Google Gemini (`gemini-2.5-flash`) |
+| API server | FastAPI (via `get_fast_api_app`) |
+| Frontend | Vanilla JS + marked.js (custom split-screen UI) |
+| Deployment | Google Cloud Run + Cloud Build |
 
-## Project Structure
+## Local Setup
 
-```
-documentation_agent_v2/
-├── requirements.txt
-├── .env.example
-└── documentation_adk/
-    ├── __init__.py          # Exports root_agent
-    ├── agent.py             # Root coordinator agent
-    ├── config.py            # Loads env vars
-    ├── callbacks.py         # ADK callback hooks
-    ├── tools.py             # ADK tools (load, preview, finalize)
-    ├── project_context.py   # ZIP extraction & file analysis
-    ├── prompts/             # Agent instruction prompts
-    └── sub_agents/
-        ├── analysis_agent.py
-        └── template_agent.py
-```
+### Prerequisites
 
-## Setup
+- Python 3.11+
+- A [Gemini API key](https://aistudio.google.com/app/apikeys)
 
 ### 1. Clone and create a virtual environment
 
@@ -44,7 +58,7 @@ documentation_agent_v2/
 git clone <your-repo-url>
 cd documentation_agent_v2
 python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
 
 ### 2. Install dependencies
@@ -55,115 +69,95 @@ pip install -r requirements.txt
 
 ### 3. Configure environment variables
 
-```bash
-export GOOGLE_API_KEY=your_gemini_api_key_here
-export GEMINI_MODEL=gemini-2.0-flash  # optional, this is the default
-```
+Edit `documentation_adk/.env`:
 
-Or create a `.env` file in the repo root:
-
-```
+```env
 GOOGLE_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash
+USE_LOCAL_STORAGE=true
 ```
 
-You can get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikeys).
-
-### 4. Start the ADK web server
+### 4. Run the server
 
 ```bash
-adk web --port 8000
+python main.py
 ```
 
-Then open `http://localhost:8000` and select `documentation_adk` from the agent list.
+Open `http://localhost:8080` in your browser.
 
 ## Usage
 
-1. **Upload your project** as a `.zip` file via the ADK Web UI
-2. **Upload a documentation template** (`.md` or `.txt`)
-3. **Ask the agent** to generate documentation (e.g. _"Generate documentation for this project"_)
-4. **Review the draft** — request revisions in plain English if needed:
-   - _"Make the overview shorter"_
-   - _"Remove the setup section"_
-   - _"Add a section about configuration"_
-5. **Confirm** to save — say _"confirm"_, _"looks good"_, _"save it"_, etc.
-6. **Download** the generated file from the artifacts area
+1. **Start a conversation** — say hello or type `github` / `zip` to begin
+2. **Provide your source**:
+   - *GitHub*: paste the repository URL, confirm public/private, supply a PAT if needed
+   - *ZIP*: upload your project archive when prompted
+3. **Choose a template** — upload a custom template or press Enter to use the default
+4. **Review the preview** — the draft loads in the right panel; request any revisions in plain English
+5. **Save** — reply `save` or `confirm` to generate the final `.docx`
+6. **Download** — click the **Download** button that appears in the preview header
 
-## Demo
+## Project Structure
 
-### Step 1 — Upload files and trigger generation
+```
+documentation_agent_v2/
+├── main.py                      # FastAPI entry point + download endpoint
+├── requirements.txt
+├── cloudbuild.yaml              # Cloud Build CI/CD pipeline
+├── Dockerfile
+├── static/
+│   └── index.html               # Split-screen chat + preview UI
+└── documentation_adk/
+    ├── __init__.py              # Exports root_agent
+    ├── agent.py                 # Root coordinator agent
+    ├── config.py                # Env var loading
+    ├── callbacks.py             # ADK callback hooks
+    ├── tools.py                 # load_project, preview, finalize tools
+    ├── project_context.py       # GitHub fetch & ZIP extraction
+    ├── prompts/                 # Agent instruction prompts
+    └── sub_agents/
+        ├── analysis_agent.py    # Drafts documentation from source
+        └── template_agent.py   # Fits draft to the chosen template
+```
 
-Upload your project `.zip` and documentation template, then ask the agent to generate the docs. The agent immediately calls `prepare_documentation_preview` and begins analyzing your codebase.
+## Deployment (Google Cloud Run)
 
-![Upload files and trigger generation](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.16.00.png)
+The repo includes a `cloudbuild.yaml` for automated deployment via Cloud Build triggers.
 
-### Step 2 — Review the draft preview
+### Required Cloud Build configuration
 
-The agent returns a structured draft preview fitted to your template. Each section is labeled so you can see exactly what was generated. You can request changes in plain English before committing.
+1. Grant the Cloud Build service account the **Cloud Run Admin** and **Service Account User** roles
+2. Store your Gemini API key as a Secret Manager secret (e.g. `GOOGLE_API_KEY`) and grant the service account access
+3. Connect your GitHub repo to a Cloud Build trigger pointing at `cloudbuild.yaml`
 
-![Draft preview](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.16.26.png)
+### Manual deploy
 
-### Step 3 — Confirm and save
+```bash
+gcloud builds submit --config cloudbuild.yaml
+```
 
-Once you're happy with the draft, reply with `confirm`, `save`, or similar. The agent finalizes the document, saves it as a named Markdown artifact (e.g. `newsletter_project_documentation.md`), and makes it available for download in the ADK Web artifacts panel.
+The build tags the image with `$COMMIT_SHA`, pushes it to Artifact Registry, and deploys to Cloud Run in `australia-southeast1`.
 
-![Confirm and save](https://github.com/ChaiAbs/Documentation_Agent/blob/main/Screenshot%202026-04-06%20at%2012.17.39.png)
+### Environment variables on Cloud Run
 
-## Template Format
+| Variable | Value |
+|---|---|
+| `GEMINI_MODEL` | `gemini-2.5-flash` |
+| `USE_LOCAL_STORAGE` | `true` |
+| `SERVE_WEB_INTERFACE` | `false` |
+| `GOOGLE_API_KEY` | set via Secret Manager |
 
-The uploaded template can be:
+> **Note:** The service runs with `--max-instances=1` to ensure artifact files are always on the same instance as the download request. For a multi-instance production deployment, swap `USE_LOCAL_STORAGE` for a Cloud Storage–backed artifact service.
 
-- A Markdown file with placeholders like `{{project_name}}`, `{{overview}}`, `{{setup}}`
-- A Markdown outline with headings to be filled in
-- A plain-text documentation skeleton
-
-The generated output is saved as a Markdown artifact (filename: `{project_name}-documentation.md`).
-
-## Configuration
+## Configuration Reference
 
 | Variable | Default | Description |
 |---|---|---|
 | `GOOGLE_API_KEY` | required | Gemini API key |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | Model to use (e.g. `gemini-2.5-flash`) |
-
-### Analysis limits (`project_context.py`)
-
-| Setting | Value | Description |
-|---|---|---|
-| `MAX_FILE_BYTES` | 24,000 | Max bytes read per file |
-| `MAX_TEXT_FILES` | 18 | Max files included in context |
-| `MAX_TOTAL_CHARS` | 80,000 | Total character budget for excerpts |
-
-Ignored directories: `.git`, `node_modules`, `.venv`, `dist`, `build`, `__pycache__`, `.next`, `coverage`
-
-## How It Works
-
-```
-User uploads ZIP + template
-         ↓
-Root Agent (coordinator)
-         ↓
-prepare_documentation_preview()
-    ├── Analysis Agent
-    │     ├── Extracts file tree & key excerpts from ZIP
-    │     └── Drafts documentation
-    └── Template Agent
-          └── Fits draft to the provided template
-         ↓
-Preview shown to user
-         ↓
-   ┌─────┴──────┐
-Revision     Confirmation
-   │               │
-Re-draft     finalize_documentation()
-                   │
-             Artifact saved & ready for download
-```
-
-## Notes
-
-- This project assumes UTF-8 templates.
-- For production use you would likely add persistent artifact storage, background job queues, richer AST-based project parsing, rate limiting, and user authentication.
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Gemini model ID |
+| `USE_LOCAL_STORAGE` | `false` | Use disk-based artifact storage |
+| `SERVE_WEB_INTERFACE` | `false` | Enable ADK's built-in web UI (disabled — custom UI is used) |
+| `PORT` | `8080` | HTTP port |
+| `ALLOW_ORIGINS` | (none) | Comma-separated CORS origins |
 
 ## License
 
