@@ -8,19 +8,19 @@ Connect a GitHub repository (public or private via token) or upload a project ZI
 
 ### 1. Start a session
 
-![Start screen](screenshots/01-start.png)
+![Start screen](01-start.png)
 
 The agent greets you and explains what it needs. Type **"github"** (or **"zip"** to upload an archive instead) and it immediately asks for your repository URL. Once provided, it confirms whether the repo is public or private and — for private repos — prompts for a personal access token. The right-hand panel shows a placeholder until the first draft is ready.
 
 ### 2. Documentation preview loads automatically
 
-![Preview loaded](screenshots/02-preview.png)
+![Preview loaded](02-preview.png)
 
 After you supply the URL, confirm visibility, and choose a template (or accept the default), the agent fetches the repo, analyzes the codebase, and streams a rendered documentation draft into the right panel. The example here shows a full project documentation for a medical image diagnosis deep-learning project, with an overview, features list, architecture details, and more — all structured and formatted automatically.
 
 ### 3. Confirm, save, and download
 
-![Download ready](screenshots/03-download.png)
+![Download ready](03-download.png)
 
 Reply **"save"** (or **"confirm"**) when you're satisfied. The agent finalizes the `.docx` file and a **Download** button labeled with the filename appears in the preview header. Click it and the file downloads directly to your machine — no extra steps.
 
